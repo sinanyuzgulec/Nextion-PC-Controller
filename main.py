@@ -30,15 +30,12 @@ class NextionKernel:
         return None
 
     def send(self, cmd):
-        """Donanım seviyesinde veri gönderimi"""
         try:
             self.ser.write(cmd.encode('ascii') + b'\xff\xff\xff')
         except: pass
 
     def worker_loop(self):
-        """Sayfalara göre ilgili modülü çalıştıran ana döngü"""
         while self.running:
-            # 1. Sistem Sayfası
             if self.current_page == "cputempPage":
                 data = system_monitor.get_stats()
                 for obj, val in data.items():
@@ -47,15 +44,10 @@ class NextionKernel:
                     else: # Text
                         self.send(f'{obj}.txt="{val}"')
             
-            # 2. Borsa Sayfası (Eklendiğinde aktif edilecek)
-            # elif self.current_page == "currencyPage":
-            #     data = currency_monitor.get_rates()
-            #     ...
             
             time.sleep(2)
 
     def listener(self):
-        """Nextion'dan gelen sayfa değişimlerini yakalar"""
         buffer = b""
         while self.running:
             if self.ser.in_waiting > 0:
@@ -77,29 +69,24 @@ class NextionKernel:
 
 def worker_loop(self):
         while self.running:
-            if self.current_page == "systemPage": # Sayfa ismini kontrol et
+            if self.current_page == "systemPage": 
                 vol = media_control.get_current_volume()
-                self.send(f"h0.val={vol}")      # Slider'ı güncelle
-                self.send(f"t3.txt=\"{vol}\"")  # Texti güncelle
+                self.send(f"h0.val={vol}")    
+                self.send(f"t3.txt=\"{vol}\"")  
             
-            # ... (Diğer sayfa kontrolleri)
             time.sleep(1)
 
 def handle_incoming(self, msg):
-        # Slider'dan gelen değer (Örn: "h0:75")
         if ":" in msg and msg.startswith("h0"):
             val = int(msg.split(":")[1])
             media_control.set_volume(val)
             
-        # Mikrofon Butonu (p1)
         elif msg == "p1_press":
             media_control.toggle_mic_mute()
             
-        # Hoparlör Butonu (p0)
         elif msg == "p0_press":
             media_control.toggle_mute()
             
-        # Sayfa Değişimi
         elif msg.startswith("page:"):
             self.current_page = msg.split(":")[1]
 
